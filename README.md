@@ -2,11 +2,7 @@
 
 **Deduplicating archiver for versioned data.**
 
-Packs multiple versions of a project into a single archive, achieving 5-20x better compression than tar+zstd by eliminating inter-version redundancy.
-
-## How it works
-
-maxpack uses content-defined chunking (CDC) to split files into variable-size blocks, deduplicates identical blocks across all versions, sorts similar blocks together, and compresses them as a solid stream with zstd. The result: only unique data is stored once, regardless of how many versions contain it.
+Packs multiple versions of a project into a single archive, achieving 5-20x better compression than tar+zstd by eliminating inter-version redundancy. Uses a proprietary deduplication and compression pipeline optimized for versioned data.
 
 ## Benchmarks
 
@@ -20,7 +16,7 @@ Compression ratio (higher = better) on real-world versioned datasets:
 | go | 911 MB | **18.5x** | 4.5x | 12.8x | 6.2x | 2.6x | 3.4x |
 | cpython | 964 MB | **13.4x** | 3.7x | 10.1x | 4.8x | 2.4x | 3.3x |
 
-On small datasets, 7z achieves similar ratios but is 20-100x slower. On large datasets (>100 MB), maxpack dominates both ratio and speed:
+On large datasets (>100 MB), maxpack dominates both ratio and speed:
 
 | 900 MB dataset | maxpack | 7z -mx=9 | tar+xz |
 |----------------|---------|----------|--------|
