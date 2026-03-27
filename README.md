@@ -54,25 +54,25 @@ sudo mv maxpack-* /usr/local/bin/maxpack
 **Pack** multiple versions of a project:
 
 ```bash
-maxpack pack --output project.mpk ./v1.0 ./v1.1 ./v1.2
+maxpack pack --output project.maxpack ./v1.0 ./v1.1 ./v1.2
 ```
 
 **Unpack** an archive:
 
 ```bash
-maxpack unpack project.mpk --output ./restored
+maxpack unpack project.maxpack --output ./restored
 ```
 
 **Inspect** archive contents:
 
 ```bash
-maxpack info project.mpk
+maxpack info project.maxpack
 ```
 
 On first run, you'll be asked to accept the license agreement. You can also accept non-interactively:
 
 ```bash
-maxpack --accept-license pack --output project.mpk ./data
+maxpack --accept-license pack --output project.maxpack ./data
 ```
 
 ## License
