@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-REPO="PerSerMax/maxpack"
+REPO="MaxPer2005/maxpack"
 BINARY="maxpack"
 
 # Detect OS and architecture

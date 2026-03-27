@@ -35,12 +35,12 @@ On small datasets, 7z achieves similar ratios but is 20-100x slower. On large da
 ### Quick install (macOS & Linux)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/PerSerMax/maxpack/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/MaxPer2005/maxpack/main/install.sh | sh
 ```
 
 ### Manual download
 
-Download the binary for your platform from [Releases](https://github.com/PerSerMax/maxpack/releases/latest):
+Download the binary for your platform from [Releases](https://github.com/MaxPer2005/maxpack/releases/latest):
 
 | Platform | Binary |
 |----------|--------|

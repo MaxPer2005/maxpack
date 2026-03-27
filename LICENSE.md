@@ -22,7 +22,7 @@ Patent pending.
 
 **"Volume Limit"** means a cumulative input data volume of 50 GB.
 
-**"Official Channels"** means the maxpack GitHub repository (https://github.com/PerSerMax/maxpack) and any other distribution channels explicitly designated by Licensor.
+**"Official Channels"** means the maxpack GitHub repository (https://github.com/MaxPer2005/maxpack) and any other distribution channels explicitly designated by Licensor.
 
 ---
 
