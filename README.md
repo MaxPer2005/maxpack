@@ -10,11 +10,12 @@ Compression ratio (higher = better) on real-world versioned datasets:
 
 | Dataset | Input Size | maxpack | tar+zstd | 7z -mx=9 | tar+xz | tar+lz4 | zip |
 |---------|-----------|---------|----------|----------|--------|---------|-----|
-| lsd | 4 MB | **26.0x** | 15.4x | 34.9x | 30.7x | 3.1x | 3.9x |
+| lsd | 4 MB | **31.9x** | 15.4x | 34.9x | 30.7x | 3.1x | 3.9x |
 | fd | 4 MB | **23.7x** | 12.5x | 30.1x | 27.2x | 2.7x | 3.7x |
-| bat | 56 MB | **11.3x** | 3.3x | 14.6x | 4.0x | 2.5x | 2.9x |
-| go | 911 MB | **18.5x** | 4.5x | 12.8x | 6.2x | 2.6x | 3.4x |
+| bat | 56 MB | **6.4x** | 3.3x | 14.6x | 4.0x | 2.5x | 2.9x |
+| go | 911 MB | **20.2x** | 4.5x | 12.8x | 6.2x | 2.6x | 3.4x |
 | cpython | 964 MB | **13.4x** | 3.7x | 10.1x | 4.8x | 2.4x | 3.3x |
+| **all** | **1.9 GB** | **15.5x** | 4.1x | 11.6x | 5.3x | 2.5x | 3.3x |
 
 On large datasets (>100 MB), maxpack dominates both ratio and speed:
 
@@ -23,18 +24,27 @@ On large datasets (>100 MB), maxpack dominates both ratio and speed:
 | | maxpack | 7z -mx=9 | tar+xz |
 |---|---------|----------|--------|
 | **Ratio** | **20.2x** | 12.8x | 6.2x |
-| **Pack time** | **6.8s** | 79.8s | 242.7s |
-| **Unpack time** | **6.2s** | 11.8s | 42.9s |
-| **Pack speed** | **134 MB/s** | 11.4 MB/s | 3.8 MB/s |
+| **Pack time** | **6.3s** | 79.8s | 242.7s |
+| **Unpack time** | **5.3s** | 11.8s | 42.9s |
+| **Pack speed** | **145 MB/s** | 11.4 MB/s | 3.8 MB/s |
 
 **cpython** (964 MB, 10 versions):
 
 | | maxpack | 7z -mx=9 | tar+xz |
 |---|---------|----------|--------|
 | **Ratio** | **13.4x** | 10.1x | 4.8x |
-| **Pack time** | **4.1s** | 94.5s | 221.9s |
-| **Unpack time** | **2.8s** | 5.0s | 22.8s |
-| **Pack speed** | **235 MB/s** | 10.2 MB/s | 4.3 MB/s |
+| **Pack time** | **4.4s** | 94.5s | 221.9s |
+| **Unpack time** | **2.6s** | 5.0s | 22.8s |
+| **Pack speed** | **220 MB/s** | 10.2 MB/s | 4.3 MB/s |
+
+**all** (1.9 GB, all datasets combined):
+
+| | maxpack | 7z -mx=9 | tar+xz |
+|---|---------|----------|--------|
+| **Ratio** | **15.5x** | 11.6x | 5.3x |
+| **Pack time** | **14.4s** | 249.1s | 483.0s |
+| **Unpack time** | **8.3s** | 17.3s | 67.0s |
+| **Pack speed** | **135 MB/s** | 7.8 MB/s | 4.0 MB/s |
 
 ![Compression metrics across datasets](benchmarks_curves.png)
 
