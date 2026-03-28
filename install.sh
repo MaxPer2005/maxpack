@@ -41,6 +41,11 @@ fi
 
 chmod +x "$TMP"
 
+# macOS: remove quarantine attribute to avoid Gatekeeper block
+if [ "$OS" = "Darwin" ]; then
+    xattr -d com.apple.quarantine "$TMP" 2>/dev/null || true
+fi
+
 # Install: prefer ~/.local/bin (no sudo), fall back to /usr/local/bin
 INSTALL_DIR=""
 

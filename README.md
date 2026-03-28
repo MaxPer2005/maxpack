@@ -52,8 +52,6 @@ On large datasets (>100 MB), maxpack dominates both ratio and speed:
 
 maxpack exposes a C-compatible FFI interface (`maxpack.h`) for embedding the compression engine directly into your applications. Bind it from Python, Go, C++, or any language with C FFI support.
 
-FUSE support is available for mounting `.maxpack` archives as read-only filesystems.
-
 ## Install
 
 ### Quick install (macOS & Linux)
@@ -74,6 +72,11 @@ Download the binary for your platform from [Releases](https://github.com/MaxPer2
 ```bash
 chmod +x maxpack-*
 sudo mv maxpack-* /usr/local/bin/maxpack
+```
+
+**macOS note:** If you get "cannot be opened because the developer cannot be verified", run:
+```bash
+xattr -d com.apple.quarantine /usr/local/bin/maxpack
 ```
 
 ## Quick Start
