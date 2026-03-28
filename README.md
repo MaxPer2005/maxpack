@@ -70,7 +70,6 @@ Download the binary for your platform from [Releases](https://github.com/MaxPer2
 |----------|--------|
 | macOS (Apple Silicon) | `maxpack-darwin-arm64` |
 | Linux x86_64 | `maxpack-linux-amd64` |
-| Linux ARM64 | `maxpack-linux-arm64` |
 
 ```bash
 chmod +x maxpack-*
