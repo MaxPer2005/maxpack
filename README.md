@@ -22,9 +22,16 @@ On large datasets (>100 MB), maxpack dominates both ratio and speed:
 |----------------|---------|----------|--------|
 | **Ratio** | **18.5x** | 12.8x | 6.2x |
 | **Pack time** | **2.2s** | 79.8s | 242.7s |
+| **Unpack time** | **4.9s** | 4.9s | 37.6s |
 | **Pack speed** | **395 MB/s** | 10.9 MB/s | 3.6 MB/s |
 
 ![Compression metrics across datasets](benchmarks_curves.png)
+
+## Integration
+
+maxpack exposes a C-compatible FFI interface (`maxpack.h`) for embedding the compression engine directly into your applications. Bind it from Python, Go, C++, or any language with C FFI support.
+
+FUSE support is available for mounting `.maxpack` archives as read-only filesystems.
 
 ## Install
 
