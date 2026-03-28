@@ -18,12 +18,23 @@ Compression ratio (higher = better) on real-world versioned datasets:
 
 On large datasets (>100 MB), maxpack dominates both ratio and speed:
 
-| 900 MB dataset | maxpack | 7z -mx=9 | tar+xz |
-|----------------|---------|----------|--------|
+**go** (911 MB, 10 versions):
+
+| | maxpack | 7z -mx=9 | tar+xz |
+|---|---------|----------|--------|
 | **Ratio** | **18.5x** | 12.8x | 6.2x |
 | **Pack time** | **2.2s** | 79.8s | 242.7s |
-| **Unpack time** | **4.9s** | 4.9s | 37.6s |
-| **Pack speed** | **395 MB/s** | 10.9 MB/s | 3.6 MB/s |
+| **Unpack time** | **7.6s** | 11.8s | 42.9s |
+| **Pack speed** | **414 MB/s** | 11.4 MB/s | 3.8 MB/s |
+
+**cpython** (964 MB, 10 versions):
+
+| | maxpack | 7z -mx=9 | tar+xz |
+|---|---------|----------|--------|
+| **Ratio** | **13.4x** | 10.1x | 4.8x |
+| **Pack time** | **2.9s** | 94.5s | 221.9s |
+| **Unpack time** | **6.2s** | 5.0s | 22.8s |
+| **Pack speed** | **332 MB/s** | 10.2 MB/s | 4.3 MB/s |
 
 ![Compression metrics across datasets](benchmarks_curves.png)
 
