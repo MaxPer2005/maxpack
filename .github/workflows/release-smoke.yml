@@ -63,24 +63,14 @@ jobs:
         include:
           - os: ubuntu-latest
             asset: maxpack-linux-amd64
-            shell: bash
-            command: chmod +x dist/maxpack-linux-amd64 && ./dist/maxpack-linux-amd64 --version
           - os: ubuntu-24.04-arm
             asset: maxpack-linux-arm64
-            shell: bash
-            command: chmod +x dist/maxpack-linux-arm64 && ./dist/maxpack-linux-arm64 --version
           - os: macos-14
             asset: maxpack-darwin-arm64
-            shell: bash
-            command: chmod +x dist/maxpack-darwin-arm64 && ./dist/maxpack-darwin-arm64 --version
           - os: macos-15-intel
             asset: maxpack-darwin-amd64
-            shell: bash
-            command: chmod +x dist/maxpack-darwin-amd64 && ./dist/maxpack-darwin-amd64 --version
           - os: windows-2022
             asset: maxpack-windows-amd64.exe
-            shell: pwsh
-            command: .\dist\maxpack-windows-amd64.exe --version
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -117,7 +107,15 @@ jobs:
         shell: bash
         run: gh release download "${{ steps.resolve.outputs.tag }}" --repo "$REPO" --dir dist --clobber
 
-      - name: Smoke test CLI binary
-        shell: ${{ matrix.shell }}
+      - name: Smoke test CLI binary (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
-          ${{ matrix.command }}
+          chmod +x "dist/${{ matrix.asset }}"
+          "./dist/${{ matrix.asset }}" --version
+
+      - name: Smoke test CLI binary (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          & ".\dist\${{ matrix.asset }}" --version
