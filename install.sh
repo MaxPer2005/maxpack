@@ -3,6 +3,7 @@ set -e
 
 REPO="MaxPer2005/maxpack"
 BINARY="maxpack"
+CHECKSUMS="SHA256SUMS.txt"
 
 # Detect OS and architecture
 OS="$(uname -s)"
@@ -21,22 +22,59 @@ case "$ARCH" in
 esac
 
 ASSET="${BINARY}-${OS_TAG}-${ARCH_TAG}"
+case "${OS_TAG}-${ARCH_TAG}" in
+    darwin-arm64|linux-amd64) ;;
+    *)
+        echo "Current release supports only macOS Apple Silicon and Linux x86_64." >&2
+        echo "See https://github.com/${REPO}/releases/latest for manual downloads." >&2
+        exit 1
+        ;;
+esac
 echo "Installing ${ASSET}..."
 
 # Get latest release download URL
 DOWNLOAD_URL="https://github.com/${REPO}/releases/latest/download/${ASSET}"
+CHECKSUM_URL="https://github.com/${REPO}/releases/latest/download/${CHECKSUMS}"
 
 # Create temp file
 TMP="$(mktemp)"
-trap 'rm -f "$TMP"' EXIT
+SUMS_TMP="$(mktemp)"
+trap 'rm -f "$TMP" "$SUMS_TMP"' EXIT
+
+download() {
+    url="$1"
+    out="$2"
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$url" -o "$out"
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO "$out" "$url"
+    else
+        echo "Error: curl or wget required"; exit 1
+    fi
+}
 
 # Download
-if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "$DOWNLOAD_URL" -o "$TMP"
-elif command -v wget >/dev/null 2>&1; then
-    wget -qO "$TMP" "$DOWNLOAD_URL"
+download "$DOWNLOAD_URL" "$TMP"
+download "$CHECKSUM_URL" "$SUMS_TMP"
+
+EXPECTED="$(awk -v asset="$ASSET" '$2 == asset { print $1 }' "$SUMS_TMP")"
+if [ -z "$EXPECTED" ]; then
+    echo "Error: checksum entry for ${ASSET} not found" >&2
+    exit 1
+fi
+
+if command -v shasum >/dev/null 2>&1; then
+    ACTUAL="$(shasum -a 256 "$TMP" | awk '{print $1}')"
+elif command -v sha256sum >/dev/null 2>&1; then
+    ACTUAL="$(sha256sum "$TMP" | awk '{print $1}')"
 else
-    echo "Error: curl or wget required"; exit 1
+    echo "Warning: no SHA-256 tool found; skipping checksum verification" >&2
+    ACTUAL="$EXPECTED"
+fi
+
+if [ "$ACTUAL" != "$EXPECTED" ]; then
+    echo "Error: checksum verification failed for ${ASSET}" >&2
+    exit 1
 fi
 
 chmod +x "$TMP"

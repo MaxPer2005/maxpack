@@ -2,113 +2,84 @@
 
 **Deduplicating archiver for versioned data.**
 
-Packs multiple versions of a project into a single archive, achieving 5-20x better compression than tar+zstd by eliminating inter-version redundancy. Uses a proprietary deduplication and compression pipeline optimized for versioned data.
+maxpack is a proprietary binary archiver built for corpora where files or releases overlap heavily: tagged source trees, CI artifacts, backups, logs, database dumps, and similar versioned datasets. It deduplicates identical chunks, keeps similar chunks adjacent, and then runs a solid compression pass over the result.
 
-## Benchmarks
+## Public Benchmark Snapshot
 
-Compression ratio (higher = better) on real-world versioned datasets:
+This README uses one canonical public benchmark protocol:
 
-| Dataset | Input Size | maxpack | tar+zstd | 7z -mx=9 | tar+xz | tar+lz4 | zip |
-|---------|-----------|---------|----------|----------|--------|---------|-----|
-| lsd | 4 MB | **31.9x** | 15.4x | 34.9x | 30.7x | 3.1x | 3.9x |
-| fd | 4 MB | **27.9x** | 12.5x | 30.1x | 27.2x | 2.7x | 3.7x |
-| bat | 56 MB | **11.3x** | 3.3x | 14.6x | 4.0x | 2.5x | 2.9x |
-| go | 911 MB | **20.2x** | 4.5x | 12.8x | 6.2x | 2.6x | 3.4x |
-| cpython | 964 MB | **13.4x** | 3.7x | 10.1x | 4.8x | 2.4x | 3.3x |
-| **all** | **1.9 GB** | **15.5x** | 4.1x | 11.6x | 5.3x | 2.5x | 3.3x |
+- `maxpack pack --mode fast --global-zstd-level 3`
+- Apple Silicon/macOS benchmark machine
+- versioned corpora with strong inter-version overlap
 
-On large datasets (>100 MB), maxpack dominates both ratio and speed:
+| Dataset | Input | maxpack | tar+zstd -3 | 7z -mx=9 | maxpack ratio |
+|---------|------:|--------:|------------:|---------:|--------------:|
+| `cpython_312` | 817 MB | **31.0 MB** | 215.2 MB | 64.4 MB | **26.4x** |
+| `go_123` | 975 MB | **31.0 MB** | 210.1 MB | 70.7 MB | **31.4x** |
 
-**go** (911 MB, 10 versions):
+On these focused versioned-corpus benchmarks, maxpack produces archives about `6.8x-6.9x` smaller than `tar+zstd -3` and about `2.1x-2.3x` smaller than `7z -mx=9`.
 
-| | maxpack | 7z -mx=9 | tar+xz |
-|---|---------|----------|--------|
-| **Ratio** | **20.2x** | 12.8x | 6.2x |
-| **Pack time** | **6.4s** | 79.8s | 242.7s |
-| **Unpack time** | **5.4s** | 11.8s | 42.9s |
-| **Pack speed** | **142 MB/s** | 11.4 MB/s | 3.8 MB/s |
+More public plots and methodology notes: [docs/index.html](docs/index.html)
 
-**cpython** (964 MB, 10 versions):
-
-| | maxpack | 7z -mx=9 | tar+xz |
-|---|---------|----------|--------|
-| **Ratio** | **13.4x** | 10.1x | 4.8x |
-| **Pack time** | **4.4s** | 94.5s | 221.9s |
-| **Unpack time** | **2.6s** | 5.0s | 22.8s |
-| **Pack speed** | **220 MB/s** | 10.2 MB/s | 4.3 MB/s |
-
-**all** (1.9 GB, all datasets combined):
-
-| | maxpack | 7z -mx=9 | tar+xz |
-|---|---------|----------|--------|
-| **Ratio** | **15.5x** | 11.6x | 5.3x |
-| **Pack time** | **14.1s** | 249.1s | 483.0s |
-| **Unpack time** | **8.4s** | 17.3s | 67.0s |
-| **Pack speed** | **135 MB/s** | 7.8 MB/s | 4.0 MB/s |
-
-![Compression metrics across datasets](benchmarks_curves.png)
-
-## Integration
-
-maxpack exposes a C-compatible FFI interface (`maxpack.h`) for embedding the compression engine directly into your applications. Bind it from Python, Go, C++, or any language with C FFI support.
+![Benchmark curves](benchmarks_curves.png)
 
 ## Install
 
-### Quick install (macOS & Linux)
+### Quick install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/MaxPer2005/maxpack/main/install.sh | sh
 ```
 
-### Manual download
+### Supported CLI binaries in the current release
 
-Download the binary for your platform from [Releases](https://github.com/MaxPer2005/maxpack/releases/latest):
-
-| Platform | Binary |
-|----------|--------|
+| Platform | Asset |
+|----------|-------|
 | macOS (Apple Silicon) | `maxpack-darwin-arm64` |
 | Linux x86_64 | `maxpack-linux-amd64` |
 
+### FFI assets in the current release
+
+| Platform | Asset |
+|----------|-------|
+| macOS (Apple Silicon) | `libmaxpack-darwin-arm64.dylib` |
+| Linux x86_64 | `libmaxpack-linux-amd64.so` |
+
+The release also ships `maxpack.h` for C-compatible embedding.
+
+## Verify Downloads
+
+Each release publishes a `SHA256SUMS.txt` file alongside the binaries.
+
 ```bash
-chmod +x maxpack-*
-sudo mv maxpack-* /usr/local/bin/maxpack
+curl -fsSLO https://github.com/MaxPer2005/maxpack/releases/latest/download/SHA256SUMS.txt
+shasum -a 256 maxpack-darwin-arm64
 ```
 
-**macOS note:** If you get "cannot be opened because the developer cannot be verified", run:
-```bash
-xattr -d com.apple.quarantine /usr/local/bin/maxpack
-```
+Match the printed digest against the corresponding line in `SHA256SUMS.txt`.
 
 ## Quick Start
 
-**Pack** multiple versions of a project:
-
 ```bash
-maxpack pack --output project.maxpack ./v1.0 ./v1.1 ./v1.2
-```
-
-**Unpack** an archive:
-
-```bash
+maxpack pack ./v1 ./v2 ./v3 --output project.maxpack
 maxpack unpack project.maxpack --output ./restored
-```
-
-**Inspect** archive contents:
-
-```bash
 maxpack info project.maxpack
 ```
 
-On first run, you'll be asked to accept the license agreement. You can also accept non-interactively:
+On first run, the CLI asks you to accept the EULA. You can also accept it non-interactively:
 
 ```bash
-maxpack --accept-license pack --output project.maxpack ./data
+maxpack --accept-license pack ./data --output data.maxpack
 ```
 
 ## License
 
-maxpack is proprietary software. Free for personal, non-commercial use up to 50 GB cumulative input data. Unpacking is always free regardless of volume.
+maxpack is proprietary software.
 
-Commercial use requires a separate license. Contact: wundel.max@gmail.com
+- Free for personal, non-commercial use up to **25 GB per archive**
+- Unpacking existing archives is always free
+- Commercial use requires a separate license
 
-See [LICENSE.md](LICENSE.md) for the full End-User License Agreement.
+Contact: wundel.max@gmail.com
+
+Full terms: [LICENSE.md](LICENSE.md)

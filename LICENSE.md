@@ -20,9 +20,9 @@ Patent pending.
 
 **"Free Tier"** means use of the Software under the Personal Use License, subject to the Volume Limit.
 
-**"Volume Limit"** means a cumulative input data volume of 50 GB.
+**"Volume Limit"** means an input data volume of **25 GB per archive creation or archive update operation**.
 
-**"Official Channels"** means the maxpack GitHub repository (https://github.com/MaxPer2005/maxpack) and any other distribution channels explicitly designated by Licensor.
+**"Official Channels"** means the maxpack GitHub repository ([https://github.com/MaxPer2005/maxpack](https://github.com/MaxPer2005/maxpack)) and any other distribution channels explicitly designated by Licensor.
 
 ---
 
@@ -30,7 +30,7 @@ Patent pending.
 
 Subject to the terms of this Agreement, Licensor grants you a limited, non-exclusive, non-transferable, revocable license to use the Software for Personal Use, provided that:
 
-a. Your cumulative input volume does not exceed the Volume Limit.
+a. The input size processed in any single archive creation or archive update operation does not exceed the Volume Limit.
 
 b. You do not use the Software for any Commercial Use.
 
@@ -82,7 +82,9 @@ No license, right, or interest in any source code is granted under this Agreemen
 
 ## 6. Data & Telemetry
 
-The Software does not transmit any data over the network. The Software may record usage statistics (such as cumulative data volume processed) locally on your device for license enforcement purposes. No personal data, file contents, or file names are recorded.
+The Software does not transmit any data over the network.
+
+The Software may store local acceptance state and basic local configuration on your device. Current releases do not upload file contents, file names, or usage metrics.
 
 ---
 
