@@ -10,16 +10,23 @@ ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 LICENSE = ROOT / "LICENSE.md"
 INSTALL = ROOT / "install.sh"
+INSTALL_PS1 = ROOT / "install.ps1"
 SUMS = ROOT / "SHA256SUMS.txt"
 DOCS = ROOT / "docs" / "index.html"
 
 EXPECTED_CLI = {
+    "maxpack-darwin-amd64",
     "maxpack-darwin-arm64",
+    "maxpack-linux-arm64",
     "maxpack-linux-amd64",
+    "maxpack-windows-amd64.exe",
 }
 EXPECTED_FFI = {
+    "libmaxpack-darwin-amd64.dylib",
     "libmaxpack-darwin-arm64.dylib",
+    "libmaxpack-linux-arm64.so",
     "libmaxpack-linux-amd64.so",
+    "maxpack-windows-amd64.dll",
 }
 EXPECTED_SUMS = EXPECTED_CLI | EXPECTED_FFI | {"maxpack.h"}
 
@@ -51,6 +58,7 @@ def main() -> None:
         README,
         LICENSE,
         INSTALL,
+        INSTALL_PS1,
         SUMS,
         DOCS,
         ROOT / "benchmarks_curves.png",
@@ -62,6 +70,7 @@ def main() -> None:
     readme = README.read_text()
     license_text = LICENSE.read_text()
     install = INSTALL.read_text()
+    install_ps1 = INSTALL_PS1.read_text()
     docs = DOCS.read_text()
 
     require(
@@ -81,8 +90,16 @@ def main() -> None:
         "install.sh points at the wrong GitHub repository",
     )
     require(
-        "darwin-arm64|linux-amd64" in install,
+        "darwin-arm64|darwin-amd64|linux-amd64|linux-arm64" in install,
         "install.sh supported matrix drifted from the public contract",
+    )
+    require(
+        "maxpack-windows-amd64.exe" in install_ps1,
+        "install.ps1 no longer installs the expected Windows asset",
+    )
+    require(
+        "Current release supports only Windows x86_64" in install_ps1,
+        "install.ps1 platform contract drifted from the public contract",
     )
 
     for asset in sorted(EXPECTED_CLI | EXPECTED_FFI):

@@ -23,8 +23,53 @@ jobs:
         run: python3 scripts/check_public_repo.py
 
       - name: Smoke test installer
+        run: echo "validated"
+
+  installer-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            shell: bash
+            command: |
+              tmpdir="$(mktemp -d)"
+              mkdir -p "$tmpdir/home"
+              HOME="$tmpdir/home" PATH="/usr/bin:/bin:/usr/sbin:/sbin" sh ./install.sh
+              "$tmpdir/home/.local/bin/maxpack" --version
+          - os: ubuntu-24.04-arm
+            shell: bash
+            command: |
+              tmpdir="$(mktemp -d)"
+              mkdir -p "$tmpdir/home"
+              HOME="$tmpdir/home" PATH="/usr/bin:/bin:/usr/sbin:/sbin" sh ./install.sh
+              "$tmpdir/home/.local/bin/maxpack" --version
+          - os: macos-14
+            shell: bash
+            command: |
+              tmpdir="$(mktemp -d)"
+              mkdir -p "$tmpdir/home"
+              HOME="$tmpdir/home" PATH="/usr/bin:/bin:/usr/sbin:/sbin" sh ./install.sh
+              "$tmpdir/home/.local/bin/maxpack" --version
+          - os: macos-15-intel
+            shell: bash
+            command: |
+              tmpdir="$(mktemp -d)"
+              mkdir -p "$tmpdir/home"
+              HOME="$tmpdir/home" PATH="/usr/bin:/bin:/usr/sbin:/sbin" sh ./install.sh
+              "$tmpdir/home/.local/bin/maxpack" --version
+          - os: windows-2022
+            shell: pwsh
+            command: |
+              $installDir = Join-Path $env:TEMP "maxpack-install"
+              if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
+              powershell.exe -ExecutionPolicy Bypass -File .\install.ps1 -InstallDir $installDir
+              & (Join-Path $installDir "maxpack.exe") --version
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Smoke test installer
+        shell: ${{ matrix.shell }}
         run: |
-          tmpdir="$(mktemp -d)"
-          mkdir -p "$tmpdir/home"
-          HOME="$tmpdir/home" PATH="/usr/bin:/bin:/usr/sbin:/sbin" sh ./install.sh
-          "$tmpdir/home/.local/bin/maxpack" --version
+          ${{ matrix.command }}

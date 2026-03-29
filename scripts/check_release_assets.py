@@ -8,10 +8,16 @@ import sys
 
 
 EXPECTED_RELEASE_ASSETS = {
+    "libmaxpack-darwin-amd64.dylib",
     "libmaxpack-darwin-arm64.dylib",
+    "libmaxpack-linux-arm64.so",
     "libmaxpack-linux-amd64.so",
+    "maxpack-darwin-amd64",
     "maxpack-darwin-arm64",
+    "maxpack-linux-arm64",
     "maxpack-linux-amd64",
+    "maxpack-windows-amd64.dll",
+    "maxpack-windows-amd64.exe",
     "maxpack.h",
     "SHA256SUMS.txt",
 }

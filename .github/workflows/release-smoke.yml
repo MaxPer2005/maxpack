@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  verify-release:
+  validate-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -53,6 +53,71 @@ jobs:
         run: python3 scripts/check_release_assets.py dist
 
       - name: Smoke test Linux CLI binary
+        run: echo "validated"
+
+  smoke-cli:
+    needs: validate-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset: maxpack-linux-amd64
+            shell: bash
+            command: chmod +x dist/maxpack-linux-amd64 && ./dist/maxpack-linux-amd64 --version
+          - os: ubuntu-24.04-arm
+            asset: maxpack-linux-arm64
+            shell: bash
+            command: chmod +x dist/maxpack-linux-arm64 && ./dist/maxpack-linux-arm64 --version
+          - os: macos-14
+            asset: maxpack-darwin-arm64
+            shell: bash
+            command: chmod +x dist/maxpack-darwin-arm64 && ./dist/maxpack-darwin-arm64 --version
+          - os: macos-15-intel
+            asset: maxpack-darwin-amd64
+            shell: bash
+            command: chmod +x dist/maxpack-darwin-amd64 && ./dist/maxpack-darwin-amd64 --version
+          - os: windows-2022
+            asset: maxpack-windows-amd64.exe
+            shell: pwsh
+            command: .\dist\maxpack-windows-amd64.exe --version
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Resolve release tag
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+          REPO: ${{ github.repository }}
+        shell: bash
         run: |
-          chmod +x dist/maxpack-linux-amd64
-          ./dist/maxpack-linux-amd64 --version
+          if [ "$EVENT_NAME" = "release" ]; then
+            TAG="$EVENT_TAG"
+          elif [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="$(gh release list --repo "$REPO" --limit 1 --json tagName --jq '.[0].tagName')"
+          fi
+
+          if [ -z "$TAG" ]; then
+            echo "Could not resolve a release tag" >&2
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: gh release download "${{ steps.resolve.outputs.tag }}" --repo "$REPO" --dir dist --clobber
+
+      - name: Smoke test CLI binary
+        shell: ${{ matrix.shell }}
+        run: |
+          ${{ matrix.command }}

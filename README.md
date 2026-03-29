@@ -27,8 +27,16 @@ More public plots and methodology notes: [docs/index.html](docs/index.html)
 
 ### Quick install
 
+macOS and Linux:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/MaxPer2005/maxpack/main/install.sh | sh
+```
+
+Windows x86_64:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/MaxPer2005/maxpack/main/install.ps1 | iex"
 ```
 
 ### Supported CLI binaries in the current release
@@ -36,14 +44,20 @@ curl -fsSL https://raw.githubusercontent.com/MaxPer2005/maxpack/main/install.sh 
 | Platform | Asset |
 |----------|-------|
 | macOS (Apple Silicon) | `maxpack-darwin-arm64` |
+| macOS (Intel) | `maxpack-darwin-amd64` |
 | Linux x86_64 | `maxpack-linux-amd64` |
+| Linux arm64 | `maxpack-linux-arm64` |
+| Windows x86_64 | `maxpack-windows-amd64.exe` |
 
 ### FFI assets in the current release
 
 | Platform | Asset |
 |----------|-------|
 | macOS (Apple Silicon) | `libmaxpack-darwin-arm64.dylib` |
+| macOS (Intel) | `libmaxpack-darwin-amd64.dylib` |
 | Linux x86_64 | `libmaxpack-linux-amd64.so` |
+| Linux arm64 | `libmaxpack-linux-arm64.so` |
+| Windows x86_64 | `maxpack-windows-amd64.dll` |
 
 The release also ships `maxpack.h` for C-compatible embedding.
 
@@ -57,6 +71,12 @@ shasum -a 256 maxpack-darwin-arm64
 ```
 
 Match the printed digest against the corresponding line in `SHA256SUMS.txt`.
+
+On Windows:
+
+```powershell
+Get-FileHash .\maxpack-windows-amd64.exe -Algorithm SHA256
+```
 
 ## Quick Start
 

@@ -23,9 +23,10 @@ esac
 
 ASSET="${BINARY}-${OS_TAG}-${ARCH_TAG}"
 case "${OS_TAG}-${ARCH_TAG}" in
-    darwin-arm64|linux-amd64) ;;
+    darwin-arm64|darwin-amd64|linux-amd64|linux-arm64) ;;
     *)
-        echo "Current release supports only macOS Apple Silicon and Linux x86_64." >&2
+        echo "Current release supports macOS (Apple Silicon and Intel) and Linux (x86_64 and arm64)." >&2
+        echo "For Windows x86_64, use install.ps1 or download the release asset manually." >&2
         echo "See https://github.com/${REPO}/releases/latest for manual downloads." >&2
         exit 1
         ;;
