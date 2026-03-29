@@ -1,0 +1,30 @@
+name: Public Repo Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repo-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check install script syntax
+        run: sh -n install.sh
+
+      - name: Validate public repo surface
+        run: python3 scripts/check_public_repo.py
+
+      - name: Smoke test installer
+        run: |
+          tmpdir="$(mktemp -d)"
+          mkdir -p "$tmpdir/home"
+          HOME="$tmpdir/home" PATH="/usr/bin:/bin:/usr/sbin:/sbin" sh ./install.sh
+          "$tmpdir/home/.local/bin/maxpack" --version
