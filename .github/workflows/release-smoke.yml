@@ -17,7 +17,7 @@ jobs:
   verify-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Resolve release tag
         id: resolve
