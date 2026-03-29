@@ -13,6 +13,8 @@ INSTALL = ROOT / "install.sh"
 INSTALL_PS1 = ROOT / "install.ps1"
 SUMS = ROOT / "SHA256SUMS.txt"
 DOCS = ROOT / "docs" / "index.html"
+BENCHMARK_README = ROOT / "benchmarks" / "README.md"
+BENCHMARK_SCRIPT = ROOT / "benchmarks" / "smoke_pack.py"
 
 EXPECTED_CLI = {
     "maxpack-darwin-amd64",
@@ -61,6 +63,8 @@ def main() -> None:
         INSTALL_PS1,
         SUMS,
         DOCS,
+        BENCHMARK_README,
+        BENCHMARK_SCRIPT,
         ROOT / "benchmarks_curves.png",
         ROOT / "sqrt_ratio_growth.png",
         ROOT / "maxpack.h",
@@ -108,6 +112,10 @@ def main() -> None:
     require(
         "docs/index.html" in readme,
         "README no longer links to the public benchmark methodology page",
+    )
+    require(
+        "benchmarks/smoke_pack.py" in readme,
+        "README no longer points to the public benchmark helper",
     )
     require(
         "../benchmarks_curves.png" in docs and "../sqrt_ratio_growth.png" in docs,
