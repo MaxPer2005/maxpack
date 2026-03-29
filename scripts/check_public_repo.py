@@ -19,6 +19,7 @@ ARTICLE_IMAGES = (
     ROOT / "docs" / "img" / "plot_node_scaling.png",
     ROOT / "docs" / "img" / "plot_cpu_archive_size.png",
     ROOT / "docs" / "img" / "plot_versioned_projects.svg",
+    ROOT / "docs" / "img" / "plot_versioned_projects.png",
     ROOT / "docs" / "img" / "benchmarks_curves.png",
     ROOT / "docs" / "img" / "sqrt_ratio_growth.png",
 )
