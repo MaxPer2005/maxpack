@@ -19,6 +19,8 @@ ARTICLE_IMAGES = (
     ROOT / "docs" / "img" / "plot_node_scaling.png",
     ROOT / "docs" / "img" / "plot_cpu_archive_size.png",
     ROOT / "docs" / "img" / "plot_versioned_projects.svg",
+    ROOT / "docs" / "img" / "benchmarks_curves.png",
+    ROOT / "docs" / "img" / "sqrt_ratio_growth.png",
 )
 
 EXPECTED_CLI = {
@@ -70,8 +72,6 @@ def main() -> None:
         DOCS,
         BENCHMARK_README,
         BENCHMARK_SCRIPT,
-        ROOT / "benchmarks_curves.png",
-        ROOT / "sqrt_ratio_growth.png",
         ROOT / "maxpack.h",
         *ARTICLE_IMAGES,
     ):
@@ -124,7 +124,7 @@ def main() -> None:
         "README no longer points to the public benchmark helper",
     )
     require(
-        "../benchmarks_curves.png" in docs and "../sqrt_ratio_growth.png" in docs,
+        "img/benchmarks_curves.png" in docs and "img/sqrt_ratio_growth.png" in docs,
         "docs/index.html no longer references the expected plot assets",
     )
     require(

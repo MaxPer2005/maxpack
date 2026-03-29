@@ -25,7 +25,7 @@ A simple public smoke helper for repeating the same `pack --mode fast --global-z
 
 The headline CPython/Go benchmark numbers were measured with `MAXPACK_THREADS=4` for maxpack, so they are not single-core figures.
 
-![Benchmark curves](benchmarks_curves.png)
+![Benchmark curves](docs/img/benchmarks_curves.png)
 
 ## Install
 
