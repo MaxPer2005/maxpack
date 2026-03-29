@@ -17,6 +17,7 @@ BENCHMARK_README = ROOT / "benchmarks" / "README.md"
 BENCHMARK_SCRIPT = ROOT / "benchmarks" / "smoke_pack.py"
 ARTICLE_IMAGES = (
     ROOT / "docs" / "img" / "plot_node_scaling.png",
+    ROOT / "docs" / "img" / "plot_node_scaling_habr.png",
     ROOT / "docs" / "img" / "plot_cpu_archive_size.png",
     ROOT / "docs" / "img" / "plot_cpu_archive_size_habr.png",
     ROOT / "docs" / "img" / "plot_versioned_projects.svg",
