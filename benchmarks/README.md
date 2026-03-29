@@ -23,6 +23,9 @@ Default settings match the public maxpack benchmark settings:
 - `--warmups 1`
 - `--runs 2`
 
+This public smoke helper does not pin threads by itself. If you want to mirror the headline
+CPython/Go protocol more closely, run it with `MAXPACK_THREADS=4`.
+
 The script prints:
 
 - median wall time

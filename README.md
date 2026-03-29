@@ -23,6 +23,8 @@ More public plots and methodology notes: [docs/index.html](docs/index.html)
 
 A simple public smoke helper for repeating the same `pack --mode fast --global-zstd-level 3` maxpack flow on your own datasets lives in [benchmarks/smoke_pack.py](benchmarks/smoke_pack.py).
 
+The headline CPython/Go benchmark numbers were measured with `MAXPACK_THREADS=4` for maxpack, so they are not single-core figures.
+
 ![Benchmark curves](benchmarks_curves.png)
 
 ## Install
