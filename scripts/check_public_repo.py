@@ -15,6 +15,7 @@ SUMS = ROOT / "SHA256SUMS.txt"
 DOCS = ROOT / "docs" / "index.html"
 BENCHMARK_README = ROOT / "benchmarks" / "README.md"
 BENCHMARK_SCRIPT = ROOT / "benchmarks" / "smoke_pack.py"
+ACTION = ROOT / "action.yml"
 ARTICLE_IMAGES = (
     ROOT / "docs" / "img" / "plot_node_scaling.png",
     ROOT / "docs" / "img" / "plot_node_scaling_habr.png",
@@ -75,6 +76,7 @@ def main() -> None:
         DOCS,
         BENCHMARK_README,
         BENCHMARK_SCRIPT,
+        ACTION,
         ROOT / "maxpack.h",
         *ARTICLE_IMAGES,
     ):
@@ -125,6 +127,15 @@ def main() -> None:
     require(
         "benchmarks/smoke_pack.py" in readme,
         "README no longer points to the public benchmark helper",
+    )
+    require(
+        "uses: MaxPer2005/maxpack@v1" in readme,
+        "README no longer documents the GitHub Action install flow",
+    )
+    action = ACTION.read_text()
+    require(
+        'name: "Setup maxpack"' in action and 'using: "composite"' in action,
+        "action.yml no longer defines the expected composite setup action",
     )
     require(
         "img/benchmarks_curves.png" in docs and "img/sqrt_ratio_growth.png" in docs,

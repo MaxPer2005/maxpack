@@ -1,0 +1,176 @@
+name: "Setup maxpack"
+description: "Download a maxpack release binary, verify SHA-256, and add it to PATH."
+author: "MaxPer2005"
+
+inputs:
+  version:
+    description: "Release tag to install, for example v0.1.2. Use latest to resolve the newest published release."
+    required: false
+    default: "latest"
+  install-dir:
+    description: "Directory where the CLI binary should be installed. Defaults to RUNNER_TEMP/maxpack/bin."
+    required: false
+    default: ""
+  verify-checksum:
+    description: "Verify the downloaded asset against SHA256SUMS.txt."
+    required: false
+    default: "true"
+
+outputs:
+  binary-path:
+    description: "Full path to the installed maxpack binary."
+    value: ${{ steps.expose.outputs.binary-path }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install maxpack (Unix)
+      if: runner.os != 'Windows'
+      id: install-unix
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_INSTALL_DIR: ${{ inputs.install-dir }}
+        INPUT_VERIFY_CHECKSUM: ${{ inputs.verify-checksum }}
+      run: |
+        set -euo pipefail
+
+        repo="MaxPer2005/maxpack"
+
+        case "$RUNNER_OS" in
+          macOS) os_tag="darwin" ;;
+          Linux) os_tag="linux" ;;
+          *)
+            echo "Unsupported runner OS: $RUNNER_OS" >&2
+            exit 1
+            ;;
+        esac
+
+        case "$RUNNER_ARCH" in
+          X64) arch_tag="amd64" ;;
+          ARM64) arch_tag="arm64" ;;
+          *)
+            echo "Unsupported runner architecture: $RUNNER_ARCH" >&2
+            exit 1
+            ;;
+        esac
+
+        asset="maxpack-${os_tag}-${arch_tag}"
+        version="${INPUT_VERSION:-latest}"
+        install_dir="${INPUT_INSTALL_DIR:-}"
+        if [ -z "$install_dir" ]; then
+          install_dir="$RUNNER_TEMP/maxpack/bin"
+        fi
+
+        if [ "$version" = "latest" ]; then
+          base_url="https://github.com/${repo}/releases/latest/download"
+        else
+          base_url="https://github.com/${repo}/releases/download/${version}"
+        fi
+
+        tmpdir="$(mktemp -d)"
+        trap 'rm -rf "$tmpdir"' EXIT
+
+        curl -fsSL "${base_url}/${asset}" -o "${tmpdir}/${asset}"
+
+        if [ "${INPUT_VERIFY_CHECKSUM}" = "true" ]; then
+          curl -fsSL "${base_url}/SHA256SUMS.txt" -o "${tmpdir}/SHA256SUMS.txt"
+          expected="$(awk -v wanted="$asset" '$2 == wanted { print $1 }' "${tmpdir}/SHA256SUMS.txt")"
+          if [ -z "$expected" ]; then
+            echo "Checksum entry for ${asset} not found" >&2
+            exit 1
+          fi
+          if command -v shasum >/dev/null 2>&1; then
+            actual="$(shasum -a 256 "${tmpdir}/${asset}" | awk '{print $1}')"
+          elif command -v sha256sum >/dev/null 2>&1; then
+            actual="$(sha256sum "${tmpdir}/${asset}" | awk '{print $1}')"
+          else
+            echo "No SHA-256 tool found on runner" >&2
+            exit 1
+          fi
+          if [ "$actual" != "$expected" ]; then
+            echo "Checksum verification failed for ${asset}" >&2
+            exit 1
+          fi
+        fi
+
+        mkdir -p "$install_dir"
+        cp "${tmpdir}/${asset}" "${install_dir}/maxpack"
+        chmod +x "${install_dir}/maxpack"
+
+        echo "$install_dir" >> "$GITHUB_PATH"
+        echo "binary-path=${install_dir}/maxpack" >> "$GITHUB_OUTPUT"
+
+        "${install_dir}/maxpack" --version
+
+    - name: Install maxpack (Windows)
+      if: runner.os == 'Windows'
+      id: install-windows
+      shell: pwsh
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_INSTALL_DIR: ${{ inputs.install-dir }}
+        INPUT_VERIFY_CHECKSUM: ${{ inputs.verify-checksum }}
+      run: |
+        $ErrorActionPreference = "Stop"
+
+        $repo = "MaxPer2005/maxpack"
+        switch ($env:RUNNER_ARCH) {
+          "X64" { $asset = "maxpack-windows-amd64.exe" }
+          default { throw "Unsupported runner architecture: $env:RUNNER_ARCH" }
+        }
+
+        $version = if ($env:INPUT_VERSION) { $env:INPUT_VERSION } else { "latest" }
+        $installDir = if ($env:INPUT_INSTALL_DIR) { $env:INPUT_INSTALL_DIR } else { Join-Path $env:RUNNER_TEMP "maxpack\\bin" }
+        $baseUrl = if ($version -eq "latest") {
+          "https://github.com/$repo/releases/latest/download"
+        } else {
+          "https://github.com/$repo/releases/download/$version"
+        }
+
+        $tmpDir = Join-Path $env:RUNNER_TEMP ("maxpack-action-" + [guid]::NewGuid().ToString("N"))
+        New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+
+        try {
+          $tmpBinary = Join-Path $tmpDir $asset
+          Invoke-WebRequest -Uri "$baseUrl/$asset" -OutFile $tmpBinary
+
+          if ($env:INPUT_VERIFY_CHECKSUM -eq "true") {
+            $tmpSums = Join-Path $tmpDir "SHA256SUMS.txt"
+            Invoke-WebRequest -Uri "$baseUrl/SHA256SUMS.txt" -OutFile $tmpSums
+            $expectedLine = Select-String -Path $tmpSums -Pattern ("  " + [regex]::Escape($asset) + "$") | Select-Object -First 1
+            if (-not $expectedLine) {
+              throw "Checksum entry for $asset not found."
+            }
+            $expected = ($expectedLine.Line -split "\s+")[0].ToLowerInvariant()
+            $actual = (Get-FileHash -Path $tmpBinary -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne $expected) {
+              throw "Checksum verification failed for $asset."
+            }
+          }
+
+          New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+          $binaryPath = Join-Path $installDir "maxpack.exe"
+          Copy-Item $tmpBinary $binaryPath -Force
+
+          Add-Content -Path $env:GITHUB_PATH -Value $installDir
+          "binary-path=$binaryPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+          & $binaryPath --version
+        } finally {
+          Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+        }
+
+    - name: Expose output
+      id: expose
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          echo "binary-path=${{ steps.install-windows.outputs.binary-path }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "binary-path=${{ steps.install-unix.outputs.binary-path }}" >> "$GITHUB_OUTPUT"
+        fi
+
+branding:
+  icon: "download"
+  color: "green"

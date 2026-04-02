@@ -65,6 +65,30 @@ powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.c
 
 The release also ships `maxpack.h` for C-compatible embedding.
 
+## GitHub Action
+
+You can also install the CLI in GitHub Actions directly from this repository:
+
+```yaml
+- uses: MaxPer2005/maxpack@v1
+
+- run: maxpack --version
+```
+
+Pin a specific release if you want reproducible workflows:
+
+```yaml
+- uses: MaxPer2005/maxpack@v1
+  with:
+    version: v0.1.2
+```
+
+Inputs:
+
+- `version`: release tag or `latest` (default)
+- `install-dir`: custom install directory
+- `verify-checksum`: `true` by default
+
 ## Verify Downloads
 
 Each release publishes a `SHA256SUMS.txt` file alongside the binaries.

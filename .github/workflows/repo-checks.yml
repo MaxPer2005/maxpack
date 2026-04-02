@@ -56,3 +56,35 @@ jobs:
           if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
           powershell.exe -ExecutionPolicy Bypass -File .\install.ps1 -InstallDir $installDir
           & (Join-Path $installDir "maxpack.exe") --version
+
+  action-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: ubuntu-24.04-arm
+          - os: macos-14
+          - os: macos-15-intel
+          - os: windows-2022
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup maxpack via local action
+        uses: ./
+
+      - name: Smoke test action-installed CLI (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          command -v maxpack
+          maxpack --version
+
+      - name: Smoke test action-installed CLI (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $cmd = Get-Command maxpack.exe -ErrorAction Stop
+          Write-Host $cmd.Source
+          & maxpack.exe --version
